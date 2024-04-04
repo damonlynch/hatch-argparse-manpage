@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hatch-argparse-manpage"
+dynamic = ["version"]
+description = "Hatch build hook plugin to generate manual pages"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+keywords = [
+  "build",
+  "hatch",
+  "plugin",
+  "typing",
+  "documentation",
+  "manpage",
+  "manual page",
+  "help"
+]
+authors = [
+  { name = "Damon Lynch", email = "damonlynch@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Hatch",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["rich", "argparse-manpage"]
+
+[project.urls]
+Documentation = "https://github.com/damonlynch/hatch-argparse-manpage#readme"
+Issues = "https://github.com/damonlynch/hatch-argparse-manpage/issues"
+Homepage = "https://github.com/damonlynch/hatch-argparse-manpage"
+
+[project.entry-points.hatch]
+argparse-manpage = "hatch_argparse_manpage.hooks"
+
+[tool.hatch.version]
+path = "hatch_argparse_manpage/__about__.py"
