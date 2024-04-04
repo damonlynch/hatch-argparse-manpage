@@ -37,6 +37,8 @@ Instead, it acts as a wrapper around it, making it available to Hatch users.
 As such, if `argparse-manpage` changes in ways incompatible with this 
 plugin, this plugin may not function as expected.
 
+This plugin has been tested against `argparse-manpage` version 4.5.
+
 ## Configuration
 
 The [build hook plugin](https://hatch.pypa.io/latest/plugins/build-hook/)
