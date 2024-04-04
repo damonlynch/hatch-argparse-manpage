@@ -34,10 +34,10 @@ by [Pavel Raiskup](https://github.com/praiskup).
 This plugin is not an official project of
 [argparse-manpage](https://github.com/praiskup/argparse-manpage).
 Instead, it acts as a wrapper around it, making it available to Hatch users.
-As such, if `argparse-manpage` changes in ways incompatible with this 
+As such, if argparse-manpage changes in ways incompatible with this 
 plugin, this plugin may not function as expected.
 
-This plugin has been tested against `argparse-manpage` version 4.5.
+This plugin has been tested against argparse-manpage version 4.5.
 
 ## Configuration
 
@@ -87,7 +87,7 @@ extracts it from the `[project.urls]` section of the project's pyproject.toml:
 1. If a homepage URL is specified, then it is used.
 2. If not, if only one URL is specified, it is used.
 
-`argparse-manpage` uses a project URL to 
+argparse-manpage uses a project URL to 
 generate a man section that explains where to download the program the 
 page is being built for. 
 
@@ -105,9 +105,9 @@ manpages = [
 
 #### Argparse-manpage invocation
 
-This plugin defaults to calling `argparse-manpage`'s Python code directly. If 
-this generates an exception, this plugin will attempt to call `argparse-manpage` 
-as a command line program. To force the using `argparse-manpage` as a 
+This plugin defaults to calling argparse-manpage's Python code directly. If 
+this generates an exception, this plugin will attempt to call argparse-manpage 
+as a command line program. To force the use of argparse-manpage as a 
 command line program, set `force-command-line` to true (the default value is 
 false):
 ```toml
