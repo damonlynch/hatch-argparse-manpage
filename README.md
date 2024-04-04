@@ -63,6 +63,7 @@ manual page would be `man`.
 Using the configuration option `[tool.hatch.build.hooks.argparse-manpage]`, 
 specify the man pages using the format defined by 
 [argparse-manpage](https://github.com/praiskup/argparse-manpage).  
+
 For example:
 ```toml
 [tool.hatch.build.hooks.argparse-manpage]
