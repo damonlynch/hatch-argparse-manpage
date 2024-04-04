@@ -22,6 +22,8 @@ by [Pavel Raiskup](https://github.com/praiskup).
     * [Calling the plugin](#calling-the-plugin)
     * [Generating the manual page](#generating-the-manual-page)
     * [Extra options](#extra-options)
+      * [Project URLs](#project-urls)
+      * [Argparse-manpage invocation](#argparse-manpage-invocation)
   * [Cleaning output files](#cleaning-output-files)
   * [History](#history)
   * [Related Hatch plugin](#related-hatch-plugin)
@@ -52,13 +54,13 @@ build-backend = "hatchling.build"
 
 ### Generating the manual page
 
-This plugin requires the directories storing the generated manual pages are 
+This plugin requires the directories storing the generated man pages are 
 within the project's base directory, and is not equal to the project's base 
 directory.
 
 For example, for a project named `myproject`, and a src layout
 `src/myproject`, an acceptable directory in which to store a
-manual page would be `man`.
+man page would be `man`.
 
 Using the configuration option `[tool.hatch.build.hooks.argparse-manpage]`, 
 specify the man pages using the format defined by 
@@ -75,20 +77,39 @@ manpages = [
 ```
 
 ### Extra options
-By default, `argparse-manpage` uses a project URL passed to it to 
-generate a manual section that explains where to download the program the 
-page is being built for. To suppress this behavior, set `include-url`
-to false.
+
+#### Project URLs
+If a URL is not specified in the man page's build configuration, this plugin
+extracts it from the `[project.urls]` section of the project's pyproject.toml:
+
+1. If a homepage URL is specified, then it is used.
+2. If not, if only one URL is specified, it is used.
+
+`argparse-manpage` uses a project URL to 
+generate a man section that explains where to download the program the 
+page is being built for. 
+
+To suppress this behavior, set `include-url` to false (the default value is 
+true):
+```toml
+[tool.hatch.build.hooks.argparse-manpage]
+include-url = false
+manpages = [
+    "man/foo.1:object=parser:pyfile=bin/foo.py",
+    "man/bar.1:function=get_parser:pyfile=bin/bar",
+    "man/baz.1:function=get_parser:pyfile=bin/bar:prog=baz",
+]
+```
+
+#### Argparse-manpage invocation
 
 This plugin defaults to calling `argparse-manpage`'s Python code directly. If 
 this generates an exception, this plugin will attempt to call `argparse-manpage` 
 as a command line program. To force the using `argparse-manpage` as a 
-command line program, set `force-command-line` to true.
-
-For example:
+command line program, set `force-command-line` to true (the default value is 
+false):
 ```toml
 [tool.hatch.build.hooks.argparse-manpage]
-include-url = false
 force-command-line = true
 manpages = [
     "man/foo.1:object=parser:pyfile=bin/foo.py",

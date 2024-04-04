@@ -241,6 +241,13 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             del build_options.options["url"]
 
     def build_manpages(self) -> None:
+        """
+        Builds the manpages by either calling argparse-manpage Python classes directly
+        or via the command line.
+
+        The default behavior is to call the code directly.
+        """
+
         for build_options in self._manpages_to_build:
             self.console_output(
                 f"Building manpage {build_options.manpage_dir / build_options.manpage}",
@@ -259,7 +266,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
                     message = (
                         f"Exception: {e}\n"
                         f"Manpage {build_options.manpage_dir / build_options.manpage} "
-                        "failed to build when directly calling argparse_manpage "
+                        "failed to build when directly calling argparse-manpage "
                         "Python code. Will retry using the command line program..."
                     )
                     self.console_output(
@@ -277,6 +284,11 @@ class ArgparseManpageBuildHook(BuildHookInterface):
     def _load_manpage_options(
         self, options: ManpageOptions, defn_components: list[str]
     ) -> None:
+        """
+        Parse the manpage configuration options, and build a ManpageOptions object.
+        Load any missing values from pyproject.toml.
+        """
+
         self._project_config = self.metadata.config.get("project")
         basename = ""
 
@@ -332,6 +344,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
                     )
                 options[option] = value
 
+        # Load any missing values using pyproject.toml
         if self._project_config is not None:
             if "url" not in options and "urls" in self._project_config:
                 urls: dict[str, str] = self._project_config["urls"]
@@ -372,6 +385,9 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         Load the argparse-manpage config from pyproject.toml using hatch's interface
         and assign the values to private class variables.
 
+        Parsing the manual page configuration options (the full specification)
+        is needed only if actually building the manual pages.
+
         :param full_spec: Whether to load the full specification from pyproject.toml.
          If running the clean operation, loading the full specification is unnecessary.
         """
@@ -394,6 +410,9 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             )
 
         self._manpages_to_build: ManpageOptionsCollection = []
+
+        # Custom config options optionally located in the pyproject.toml section
+        # [tool.hatch.build.hooks.argparse-manpage]
         self._include_url = True
         self._force_command_line = False
 
