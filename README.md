@@ -52,16 +52,17 @@ build-backend = "hatchling.build"
 
 ### Generating the manual page
 
-This plugin requires the directory storing the generated man page is within the
-project's base directory, and is not equal to the project's base directory.
+This plugin requires the directories storing the generated manual pages are 
+within the project's base directory, and is not equal to the project's base 
+directory.
 
 For example, for a project named `myproject`, and a src layout
-`src/myproject`, an acceptable directory in which to store the
+`src/myproject`, an acceptable directory in which to store a
 manual page would be `man`.
 
 Using the configuration option `[tool.hatch.build.hooks.argparse-manpage]`, 
 specify the man pages using the format defined by 
-[argparse-manpage](https://github.com/praiskup/argparse-manpage).
+[argparse-manpage](https://github.com/praiskup/argparse-manpage).  
 For example:
 ```toml
 [tool.hatch.build.hooks.argparse-manpage]
@@ -78,10 +79,10 @@ generate a manual section that explains where to download the program the
 page is being built for. To suppress this behavior, set `include-url`
 to false.
 
-This plugin defaults to calling `argparse-manpage`'s code directly. If this 
-generates an exception, this plugin will attempt to call `argparse-manpage` 
+This plugin defaults to calling `argparse-manpage`'s Python code directly. If 
+this generates an exception, this plugin will attempt to call `argparse-manpage` 
 as a command line program. To force the using `argparse-manpage` as a 
-command line program, set force-command-line to true.
+command line program, set `force-command-line` to true.
 
 For example:
 ```toml
