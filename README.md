@@ -87,7 +87,7 @@ extracts it from the `[project.urls]` section of the project's pyproject.toml:
 1. If a homepage URL is specified, then it is used.
 2. If not, if only one URL is specified, it is used.
 
-argparse-manpage uses a project URL to 
+Argparse-manpage uses a project URL to 
 generate a man section that explains where to download the program the 
 page is being built for. 
 
