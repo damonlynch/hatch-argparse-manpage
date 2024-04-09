@@ -8,14 +8,14 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple
+from typing import Any, Iterator, NamedTuple, Union
 
-import argparse_manpage.tooling
-import argparse_manpage.manpage
+import argparse_manpage.tooling  # type:ignore[import-untyped]
+import argparse_manpage.manpage  # type:ignore[import-untyped]
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 from rich.console import Console
 
-ManpageOptions = dict[str, str | list[tuple[str, str]] | list[str]]
+ManpageOptions = dict[str, Union[str, list[tuple[str, str]], list[str]]]
 
 
 class ManpageToBuildOptions(NamedTuple):
@@ -60,7 +60,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         return f"[tool.hatch.build.hooks.{self.PLUGIN_NAME}]"
 
     @staticmethod
-    def _assemble_command(cmd: str) -> list[str] | str:
+    def _assemble_command(cmd: str) -> Union[list[str], str]:
         if sys.platform == "win32":
             return cmd
         return shlex.split(cmd)
