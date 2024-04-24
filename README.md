@@ -57,7 +57,7 @@ build-backend = "hatchling.build"
 ### Generating the manual page
 
 This plugin requires the directories storing the generated man pages are 
-within the project's base directory, and is not equal to the project's base 
+within the project's base directory, and are not equal to the project's base 
 directory.
 
 For example, for a project named `myproject`, and a src layout
