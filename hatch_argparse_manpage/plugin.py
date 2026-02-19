@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: Copyright 2024 Damon Lynch <damonlynch@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-or-later
+#  SPDX-FileCopyrightText: 2024-2026 Damon Lynch <damonlynch@gmail.com>
+#  SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
 from email.utils import parseaddr
@@ -458,8 +458,6 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         self.build_manpages()
 
     def setup_console(self) -> None:
-        if self.app.verbosity < 0:
-            return
         self.console = Console(force_terminal=True, force_interactive=False)
 
         # Match default Hatch color config:
