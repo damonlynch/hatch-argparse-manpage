@@ -9,7 +9,7 @@ ______________________________________________________________________
 
 This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-hooks) plugin for [Hatch](https://github.com/pypa/hatch) to automatically generate a manual page from an `ArgumentParser` object, using [argparse-manpage](https://github.com/praiskup/argparse-manpage) by [Pavel Raiskup](https://github.com/praiskup).
 
-**Important:** using argparse-manpage means that module imports are unavailable at build time in your argparse script.
+**Important:** an unavoidable aspect of argparse-manpage is that module imports are unavailable at build time in your argparse script.
 
 **Table of Contents**
 
@@ -48,6 +48,8 @@ build-backend = "hatchling.build"
 
 ### Generating the manual page
 
+This plugin will do nothing unless the build target is `sdist` or `wheel`.
+
 This plugin requires the directories storing the generated man pages are within the project's base directory, and are not equal to the project's base directory.
 
 For example, for a project named `myproject`, and a src layout `src/myproject`, an acceptable directory in which to store a man page would be `man`.
@@ -66,6 +68,15 @@ manpages = [
 ```
 
 ### Extra options
+
+#### Skip Platforms
+
+This plugin makes little sense on some platforms, e.g. Windows. To skip running this plugin on specific platforms use values from `sys.platform` in the configuration option `skip-platforms`, e.g.:
+
+```toml
+[tool.hatch.build.hooks.argparse-manpage]
+skip-platforms = ["win32", "cygwin"]
+```
 
 #### Project URLs
 

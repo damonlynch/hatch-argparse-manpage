@@ -1,5 +1,9 @@
 # Changelog for Hatch Argparse Manpage
 
+## 1.0.2  (2026-08-17)
+
+- Add skip-platforms configuration option.
+
 ## 1.0.1 (2026-02-19)
 
 - Don't crash when doing quiet hatch build. 
