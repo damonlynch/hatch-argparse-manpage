@@ -2,20 +2,21 @@
 #  SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
-from email.utils import parseaddr
 import shlex
 import shutil
 import subprocess
 import sys
+from collections.abc import Iterator
+from email.utils import parseaddr
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple, Union
+from typing import Any, NamedTuple, Union
 
-import argparse_manpage.tooling  # type:ignore[import-untyped]
 import argparse_manpage.manpage  # type:ignore[import-untyped]
+import argparse_manpage.tooling  # type:ignore[import-untyped]
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 from rich.console import Console
 
-ManpageOptions = dict[str, Union[str, list[tuple[str, str]], list[str]]]
+ManpageOptions = dict[str, str | list[tuple[str, str]] | list[str]]
 
 
 class ManpageToBuildOptions(NamedTuple):
@@ -60,7 +61,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         return f"[tool.hatch.build.hooks.{self.PLUGIN_NAME}]"
 
     @staticmethod
-    def _assemble_command(cmd: str) -> Union[list[str], str]:
+    def _assemble_command(cmd: str) -> list[str] | str:
         if sys.platform == "win32":
             return cmd
         return shlex.split(cmd)
@@ -187,14 +188,12 @@ class ArgparseManpageBuildHook(BuildHookInterface):
 
         # Wrap command line values in double quotes
         other_options = " ".join(
-            (
-                f"--{key.replace('_', '-')} \"{options[key]}\""
-                for key in self.MANPAGE_OPTIONS
-                if key in options and key != self.AUTHOR_PAIR
-            )
+            f'--{key.replace("_", "-")} "{options[key]}"'
+            for key in self.MANPAGE_OPTIONS
+            if key in options and key != self.AUTHOR_PAIR
         )
 
-        args = " ".join([manpage, object, import_from, format, authors, other_options])
+        args = f"{manpage} {object} {import_from} {format} {authors} {other_options}"
         # Remove extraneous whitespace before returning string
         return re.sub(r"\s+", r" ", args)
 
@@ -477,6 +476,11 @@ class ArgparseManpageBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         if self.target_name not in ["wheel", "sdist"]:
+            return
+
+        if (
+            skip_platforms := self.config.get("skip-platforms", [])
+        ) and sys.platform in skip_platforms:
             return
 
         self.setup_console()
