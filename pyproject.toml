@@ -53,5 +53,18 @@ path = "hatch_argparse_manpage/__about__.py"
 target-version = "py311"
 line-length = 88
 
+[tool.ruff.lint.per-file-ignores]
+# NOTE: defining this section replaces Hatch's built-in defaults, so the
+# stock rules for tests are repeated here, plus SLF001 since tests exercise
+# the build hook's private members
+"**/tests/**/*" = [
+  "PLC1901",
+  "PLR2004",
+  "PLR6301",
+  "S",
+  "SLF001",
+  "TID252",
+]
+
 [tool.pyrefly]
 project-includes = ["hatch_argparse_manpage"]
