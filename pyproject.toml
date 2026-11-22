@@ -36,7 +36,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
   "Typing :: Typed",
 ]
-dependencies = ["rich", "argparse-manpage", "hatchling"]
+dependencies = [
+  "rich",
+  "argparse-manpage",
+  "argparse-manpage>=4.8; python_version >= '3.15'",
+  "hatchling"
+]
 
 [project.urls]
 Documentation = "https://github.com/damonlynch/hatch-argparse-manpage#readme"
@@ -48,6 +53,34 @@ argparse-manpage = "hatch_argparse_manpage.hooks"
 
 [tool.hatch.version]
 path = "hatch_argparse_manpage/__about__.py"
+
+# `hatch test` only ever uses the built-in `hatch-test` environment template,
+# so the matrix must be declared there rather than on a custom env.
+# The project-level `matrix` replaces the template's Python-only matrix, and
+# a variable named `python`/`py` selects the interpreter automatically.
+# Multiple matrix definitions are the union of their cross products, used
+# here to restrict Python 3.15 cells to 4.8/latest: 4.5 works only on
+# <=3.14 (upstream _cached_theme breakage with 3.15's argparse rewrite), and
+# 4.6/4.7 are not even installable on 3.15 because generating their own man
+# pages at build time crashes in that same code path.
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.12", "3.13", "3.14"]
+argparse-manpage = ["4.5", "4.6", "4.7", "4.8", "latest"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.15"]
+argparse-manpage = ["4.8", "latest"]
+
+# extra-dependencies is additive, so the template's pytest/coverage deps
+# remain; the unpinned project dependency resolves to the pin below.
+# `latest` needs no entry: it simply takes the current release.
+[tool.hatch.envs.hatch-test.overrides]
+matrix.argparse-manpage.extra-dependencies = [
+  { value = "argparse-manpage==4.5", if = ["4.5"] },
+  { value = "argparse-manpage==4.6", if = ["4.6"] },
+  { value = "argparse-manpage==4.7", if = ["4.7"] },
+  { value = "argparse-manpage==4.8", if = ["4.8"] },
+]
 
 [tool.ruff]
 target-version = "py311"
