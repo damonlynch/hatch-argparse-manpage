@@ -22,6 +22,7 @@ This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-ho
       - [Project URLs](#project-urls)
       - [Argparse-manpage invocation](#argparse-manpage-invocation)
   - [Cleaning output files](#cleaning-output-files)
+  - [Running tests](#running-tests)
   - [History](#history)
   - [Related Hatch plugin](#related-hatch-plugin)
   - [License](#license)
@@ -30,7 +31,7 @@ This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-ho
 
 This plugin is not an official project of [argparse-manpage](https://github.com/praiskup/argparse-manpage). Instead, it acts as a wrapper around it, making it available to Hatch users. As such, if argparse-manpage changes in ways incompatible with this plugin, this plugin may not function as expected.
 
-This plugin has been tested against argparse-manpage version 4.5.
+This plugin is tested against argparse-manpage versions 4.5&ndash;4.8. Python 3.15 requires argparse-manpage 4.8 or newer.
 
 ## Configuration
 
@@ -116,6 +117,16 @@ manpages = [
 ## Cleaning output files
 
 The plugin includes logic to remove the files it outputs using hatch's `clean` hook. As well as individual files, any output directories created will also be removed, as long as these directories do not contain files created by something other than this plugin.
+
+
+## Running tests
+
+To run the full test suite, i.e.  all supported Python and `argparse-manpage` versions, run:
+
+```
+hatch test -a
+```
+
 
 ## History
 

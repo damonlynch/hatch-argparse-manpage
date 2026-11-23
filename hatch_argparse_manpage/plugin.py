@@ -9,7 +9,7 @@ import sys
 from collections.abc import Iterator
 from email.utils import parseaddr
 from pathlib import Path
-from typing import Any, NamedTuple, Union
+from typing import Any, NamedTuple
 
 import argparse_manpage.manpage  # type:ignore[import-untyped]
 import argparse_manpage.tooling  # type:ignore[import-untyped]
@@ -17,6 +17,10 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 from rich.console import Console
 
 ManpageOptions = dict[str, str | list[tuple[str, str]] | list[str]]
+
+
+class ManpageGenerationError(RuntimeError):
+    """Raised when argparse-manpage fails to generate a man page."""
 
 
 class ManpageToBuildOptions(NamedTuple):
@@ -77,12 +81,13 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             f"{cmd_str}", level=2, style=self._style_level_debug, highlight=False
         )
         cmd = self._assemble_command(cmd_str)
-        process = subprocess.run(cmd, text=True, capture_output=True)
+        process = subprocess.run(cmd, check=False, text=True, capture_output=True)
         if process.returncode:
-            raise Exception(
+            msg = (
                 "Error while invoking argparse-manpage:\n"
                 f"{process.stderr}\n{process.stdout}"
             )
+            raise ManpageGenerationError(msg)
 
     def _clean_files(self, relative_file_paths: Iterator[str]) -> None:
         project_root: Path = Path(self.root)
@@ -126,7 +131,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             )
             shutil.rmtree(folder)
 
-    def clean(self, versions: list[str]) -> None:
+    def clean(self, versions: list[str]) -> None:  # noqa: ARG002
         """
         Remove all files created by this plug-in, if they exist.
 
@@ -166,7 +171,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
     def _build_command_line_options(self, build_options: ManpageToBuildOptions) -> str:
         options = build_options.options
         manpage = f"--output {build_options.manpage_dir / build_options.manpage}"
-        object = (
+        object_opt = (
             f"--{options['object_type']} {options['object_name']}"
             if options.get("object_type") in ("function", "object")
             else ""
@@ -176,7 +181,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             if options.get("import_type") in ("pyfile", "module")
             else ""
         )
-        format = f"--format {options['format']}" if "format" in options else ""
+        format_opt = f"--format {options['format']}" if "format" in options else ""
 
         # argparse-manpage expects pairs of --author --author-email
         authors = ""
@@ -193,7 +198,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             if key in options and key != self.AUTHOR_PAIR
         )
 
-        args = f"{manpage} {object} {import_from} {format} {authors} {other_options}"
+        args = f"{manpage} {object_opt} {import_from} {format_opt} {authors} {other_options}"
         # Remove extraneous whitespace before returning string
         return re.sub(r"\s+", r" ", args)
 
@@ -216,8 +221,10 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             options["object_type"],
             options.get("prog", None),
         )
-        format = options.get("format", "pretty")
-        assert format in ("pretty", "single-commands-section")
+        manpage_format = options.get("format", "pretty")
+        if manpage_format not in ("pretty", "single-commands-section"):
+            msg = f"Invalid format: {manpage_format}"
+            raise ValueError(msg)
 
         # Convert tuple of author and author email into a string with email
         # surrounded by angle brackets
@@ -227,7 +234,9 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             ]
             del options[self.AUTHOR_PAIR]
 
-        manpage = argparse_manpage.manpage.Manpage(parser, format=format, _data=options)
+        manpage = argparse_manpage.manpage.Manpage(
+            parser, format=manpage_format, _data=options
+        )
         argparse_manpage.tooling.write_to_filename(str(manpage), page)
 
     def apply_config_options(self, build_options: ManpageToBuildOptions) -> None:
@@ -261,7 +270,9 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             else:
                 try:
                     self._build_manpage(build_options)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
+                    # argparse-manpage's API is unstable, so any failure at all
+                    # is recovered by falling back to the command-line program
                     message = (
                         f"Exception: {e}\n"
                         f"Manpage {build_options.manpage_dir / build_options.manpage} "
@@ -290,58 +301,55 @@ class ArgparseManpageBuildHook(BuildHookInterface):
 
         self._project_config = self.metadata.config.get("project")
         basename = ""
+        authors: list[tuple[str, str]] = []
 
         for defn in defn_components:
             option, value = defn.split("=")
             if option in ("function", "object"):
-                try:
-                    assert "object_type" not in options
-                except AssertionError:
-                    raise ValueError(
+                if "object_type" in options:
+                    msg = (
                         f"'{option}' is invalid: object type "
                         f"'{options['object_type']}' is already configured"
                     )
+                    raise ValueError(msg)
                 options["object_type"] = option
                 options["object_name"] = value
 
             elif option in ("pyfile", "module"):
-                try:
-                    assert "import_type" not in options
-                except AssertionError:
-                    raise ValueError(
+                if "import_type" in options:
+                    msg = (
                         f"'{option}' is invalid: import type "
                         f"'{options['import_type']}' is already configured"
                     )
+                    raise ValueError(msg)
                 options["import_type"] = option
                 options["import_from"] = value
                 if option == "pyfile":
                     basename = Path(value).name
 
             elif option == "format":
-                try:
-                    assert "format" not in options
-                except AssertionError:
-                    raise ValueError(
-                        f"'{option}' is invalid: format is already configured "
+                if "format" in options:
+                    msg = (
+                        f"'{option}' is invalid: format "
                         f"'{options['format']}' is already configured"
                     )
+                    raise ValueError(msg)
                 options["format"] = value
 
             elif option == "author":
-                if self.AUTHOR_PAIR not in options:
-                    options[self.AUTHOR_PAIR] = []
-                assert isinstance(options[self.AUTHOR_PAIR], list)
-                options[self.AUTHOR_PAIR].append(extract_name_email(value))  # type: ignore
+                authors.append(extract_name_email(value))
 
             elif option in self.MANPAGE_OPTIONS:
-                try:
-                    assert option not in options
-                except AssertionError:
-                    raise ValueError(
+                if option in options:
+                    msg = (
                         f"'{option}' is invalid: the option "
                         f"'{options[option]}' is already configured"
                     )
+                    raise ValueError(msg)
                 options[option] = value
+
+        if authors:
+            options[self.AUTHOR_PAIR] = authors
 
         # Load any missing values using pyproject.toml
         if self._project_config is not None:
@@ -350,7 +358,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
                 url: str = ""
                 # If there is only one URL, use it
                 if len(urls) == 1:
-                    url = list(urls.values())[0]
+                    url = next(iter(urls.values()))
                 else:
                     # If there is more than one URL, use the homepage
                     # Make dictionary keys lowercase
@@ -363,12 +371,11 @@ class ArgparseManpageBuildHook(BuildHookInterface):
                     options["url"] = url
 
             if self.AUTHOR_PAIR not in options and "authors" in self._project_config:
-                options[self.AUTHOR_PAIR] = []
-                for author in self._project_config["authors"]:
-                    name = author.get("name", "")
-                    email = author.get("email", "")
-                    if name or email:
-                        options[self.AUTHOR_PAIR].append((name, email))  # type: ignore
+                options[self.AUTHOR_PAIR] = [
+                    (author.get("name", ""), author.get("email", ""))
+                    for author in self._project_config["authors"]
+                    if author.get("name") or author.get("email")
+                ]
 
             if "project_name" not in options and "name" in self._project_config:
                 options["project_name"] = self._project_config["name"]
@@ -379,7 +386,7 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         if "prog" not in options:
             options["prog"] = basename
 
-    def load_argparse_manpage_config(self, full_spec: bool) -> None:
+    def load_argparse_manpage_config(self, *, full_spec: bool) -> None:
         """
         Load the argparse-manpage config from pyproject.toml using hatch's interface
         and assign the values to private class variables.
@@ -396,17 +403,17 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         try:
             manpage_specs: list[str] = self.config["manpages"]
         except KeyError:
-            raise ValueError(
+            msg = (
                 f'Configure "manpages" in "{self.config_name()}" in '
                 "pyproject.toml to specify the manpages to generate"
             )
-        try:
-            assert isinstance(manpage_specs, list)
-        except AssertionError:
-            raise ValueError(
+            raise ValueError(msg) from None
+        if not isinstance(manpage_specs, list):
+            msg = (
                 f'Configure "manpages" in "{self.config_name()}" in '
                 "pyproject.toml as a list of manpages to generate"
             )
+            raise TypeError(msg)
 
         self._manpages_to_build: ManpageOptionsCollection = []
 
@@ -425,11 +432,12 @@ class ArgparseManpageBuildHook(BuildHookInterface):
             manpage_dir = manpage_path.parent
 
             if manpage_dir == project_root:
-                raise ValueError(
+                msg = (
                     "The directory storing the generated man page must be within the "
                     "project's base directory, and not equal to the project's base "
                     "directory"
                 )
+                raise ValueError(msg)
 
             if full_spec:
                 self._load_manpage_options(
@@ -468,13 +476,13 @@ class ArgparseManpageBuildHook(BuildHookInterface):
         self._style_level_debug = "bold"
 
     def console_output(
-        self, message: str, level: int = 0, style: str = "", highlight=True
+        self, message: str, level: int = 0, style: str = "", *, highlight: bool = True
     ) -> None:
         if self.app.verbosity < level:
             return
         self.console.print(message, style=style, highlight=highlight)
 
-    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
+    def initialize(self, version: str, build_data: dict[str, Any]) -> None:  # noqa: ARG002
         if self.target_name not in ["wheel", "sdist"]:
             return
 

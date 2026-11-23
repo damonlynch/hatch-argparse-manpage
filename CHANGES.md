@@ -1,5 +1,12 @@
 # Changelog for Hatch Argparse Manpage
 
+## 1.0.3 (2026-11-23)
+
+- Change Python compatibility to >=3.11, from >=3.10.
+- Add tests for supported versions of Python and argparse-manpage.
+- Clarify Python 3.15 requires argparse-manpage 4.8 or newer.
+- Make code base compliant with `hatch check`. 
+
 ## 1.0.2  (2026-08-17)
 
 - Add skip-platforms configuration option.
