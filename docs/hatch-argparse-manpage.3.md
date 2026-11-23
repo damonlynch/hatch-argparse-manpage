@@ -2,7 +2,7 @@
 
 # NAME
 
-hatch-argparse-manpage
+hatch-argparse-manpage \- Hatch build hook plugin to generate manual pages
 
 # SYNOPSIS
 
@@ -52,6 +52,10 @@ the generated man page. The default is _true_.  See below.
 
 :  Boolean specifying whether to invoke _argparse-manpage_ from the command 
 line or by calling it as a Python object. The default is _false_. See below.
+
+`skip-platforms`
+
+: To skip running this plugin on specific platforms use values from _sys.platform_.
 
 ## Project URLs
 If a URL is not specified in the man page's build configuration, this plugin
@@ -109,6 +113,11 @@ manpages = [
 ]
 ```
 
+Skip running this plug-in on Windows and Cygwin:
+```toml
+[tool.hatch.build.hooks.argparse-manpage]
+skip-platforms = ["win32", "cygwin"]
+```
 # HISTORY 
 
 This plugin is not an official project of
@@ -117,7 +126,7 @@ Instead, it acts as a wrapper around it, making it available to Hatch users.
 As such, if argparse-manpage changes in ways incompatible with this 
 plugin, this plugin may not function as expected.
 
-This plugin has been tested against argparse-manpage version 4.5.
+This plugin is tested against argparse-manpage versions 4.5&ndash;4.8. Python 3.15 requires argparse-manpage 4.8 or newer.
 
 The code to parse the _pyproject.toml_ config in this plugin overlaps with
 the code in _argparse-manpage_,
@@ -134,4 +143,4 @@ Damon Lynch <damonlynch@gmail.com>
 
 # COPYRIGHT
 
-Copyright 2024 Damon Lynch.
+Copyright 2024-2026 Damon Lynch.
