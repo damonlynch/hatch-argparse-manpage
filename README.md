@@ -13,19 +13,22 @@ This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-ho
 
 **Table of Contents**
 
-- [Hatch Argparse Manpage](#hatch-argparse-manpage)
-  - [Explanation](#explanation)
-  - [Configuration](#configuration)
-    - [Calling the plugin](#calling-the-plugin)
-    - [Generating the manual page](#generating-the-manual-page)
-    - [Extra options](#extra-options)
-      - [Project URLs](#project-urls)
-      - [Argparse-manpage invocation](#argparse-manpage-invocation)
-  - [Cleaning output files](#cleaning-output-files)
-  - [Running tests](#running-tests)
-  - [History](#history)
-  - [Related Hatch plugin](#related-hatch-plugin)
-  - [License](#license)
+<!-- TOC -->
+* [Hatch Argparse Manpage](#hatch-argparse-manpage)
+  * [Explanation](#explanation)
+  * [Configuration](#configuration)
+    * [Calling the plugin](#calling-the-plugin)
+    * [Generating the manual page](#generating-the-manual-page)
+    * [Extra options](#extra-options)
+      * [Skip Platforms](#skip-platforms)
+      * [Project URLs](#project-urls)
+      * [Argparse-manpage invocation](#argparse-manpage-invocation)
+  * [Cleaning output files](#cleaning-output-files)
+  * [Running tests](#running-tests)
+  * [History](#history)
+  * [Related Hatch plugin](#related-hatch-plugin)
+  * [License](#license)
+<!-- TOC -->
 
 ## Explanation
 
