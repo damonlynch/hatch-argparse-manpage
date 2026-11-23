@@ -1,5 +1,12 @@
 # Changelog for Hatch Argparse Manpage
 
+## 1.0.4 (2026-11-24)
+
+- Update manpage:
+  - Correct name
+  - Document optional key value `skip-platforms`
+  - Document tested argparse-manpage versions 
+
 ## 1.0.3 (2026-11-23)
 
 - Change Python compatibility to >=3.11, from >=3.10.
